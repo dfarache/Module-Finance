@@ -2,6 +2,7 @@ COBI.init('any token');
 COBI.devkit.overrideThumbControllerMapping.write(true);
 
 const PHYSICAL_CURRENCY = 'USD';
+const MAXIMUM_SELECTED_CURRENCIES = 4;
 const FIVE_MINUTES = 5 * 60 * 1000;
 const DIGITAL_CURRENCIES = {
     BTC: 'Bitcoin',
@@ -39,6 +40,10 @@ function loadOverviewState() {
     if(reloadDataInterval != null) {
         clearInterval(reloadDataInterval);
     }
+
+    mainContainer.load('templates/overview.html', function() {
+        loadSelectableCurrencies();
+    });
 }
 
 function getChartData() {
@@ -84,6 +89,31 @@ function subscribeToHandlebarActions() {
 
         plotLineChart();
     });
+}
+
+function loadSelectableCurrencies() {
+   var elem = $('#selectable-currencies-list');
+   var currenciesList = Object.keys( DIGITAL_CURRENCIES );
+   var currAbrv, curr, html, appendedCheckbox;
+
+   for(var i=0; i<currenciesList.length; i++) {
+      currAbrv = currenciesList[i];
+      curr = DIGITAL_CURRENCIES[ currenciesList[i] ];
+
+      html = '<li class="table-view-cell">';
+      html += curr;
+      html += '<label class="toggle">';
+      html += '<input type="checkbox" data-cobi-currency="' + currAbrv + '">';
+      html += '<div class="slider-circle round"></div></label>';
+      html += '</li>';
+
+      elem.append(html);
+
+      if(selectedCurrencies.indexOf(currAbrv) > -1) {
+          appendedCheckbox = $("ul").find("[data-cobi-currency='" + currAbrv + "']");
+          appendedCheckbox.attr('checked', 'checked');
+      }
+   }
 }
 
 (function onInit() {
