@@ -22,7 +22,7 @@ var reloadDataInterval;
 var currentIndex = 0;
 var selectedCurrencies = (localStorage['cobi-finance-currencies'] == null)
       ? ['BTC', 'ETH', 'LTC']
-      : localStorage['cobi-finance-currencies'];
+      : localStorage['cobi-finance-currencies'].split(',');
 
 function getState() {
     return COBI.parameters.state();
@@ -43,6 +43,7 @@ function loadOverviewState() {
 
     mainContainer.load('templates/overview.html', function() {
         loadSelectableCurrencies();
+        $('.currency-selector').change(onCurrencyClicked);
     });
 }
 
@@ -103,7 +104,7 @@ function loadSelectableCurrencies() {
       html = '<li class="table-view-cell">';
       html += curr;
       html += '<label class="toggle">';
-      html += '<input type="checkbox" data-cobi-currency="' + currAbrv + '">';
+      html += '<input type="checkbox" class="currency-selector" data-cobi-currency="' + currAbrv + '">';
       html += '<div class="slider-circle round"></div></label>';
       html += '</li>';
 
@@ -114,6 +115,25 @@ function loadSelectableCurrencies() {
           appendedCheckbox.attr('checked', 'checked');
       }
    }
+}
+
+function onCurrencyClicked() {
+    var checkbox = $(this);
+    var wasChecked = checkbox.is(':checked');
+    var nCheckedCheckboxes = $('.currency-selector:checked').length;
+    var currAbrv = checkbox.data('cobiCurrency');
+
+    if(nCheckedCheckboxes > MAXIMUM_SELECTED_CURRENCIES) {
+        // TODO: show warning that the user has exceeded the allowed number of currencies
+        setTimeout(function() { checkbox.removeAttr('checked'); }, 550)
+    } else if(wasChecked) {
+        selectedCurrencies.push(currAbrv);
+    } else {
+        var index = selectedCurrencies.indexOf(currAbrv);
+        selectedCurrencies.splice(index, 1);
+    }
+
+    localStorage['cobi-finance-currencies'] = selectedCurrencies;
 }
 
 (function onInit() {
